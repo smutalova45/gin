@@ -13,7 +13,7 @@ type CreateUser struct {
 	FullName string `json:"full_name"`
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
-	Cash     uint   `json:"cash"`
+	Cash     int   `json:"cash"`
 	UserType string `json:"user_type"`
 }
 

@@ -22,9 +22,14 @@ func NewUserRepo(db *sql.DB) storage.IUserStorage {
 func (u *userRepo) Create(createUser models.CreateUser) (string, error) {
 
 	uid := uuid.New()
+	fmt.Println("s.fN", createUser.FullName)
+	fmt.Println("p", createUser.Phone)
+	fmt.Println("ps", createUser.Password)
+	fmt.Println("ps.use ", createUser.UserType)
+	fmt.Println("ps: ", createUser.Cash)
 
 	if _, err := u.db.Exec(`insert into 
-			users values ($1, $2, $3, $4, $5, $6)
+			users (id, full_name, phone, password, user_role, cash) values ($1, $2, $3, $4, $5, $6)
 			`,
 		uid,
 		createUser.FullName,
@@ -33,6 +38,7 @@ func (u *userRepo) Create(createUser models.CreateUser) (string, error) {
 		createUser.UserType,
 		createUser.Cash,
 	); err != nil {
+		fmt.Println("err ", err.Error())
 		fmt.Println("error while inserting data", err.Error())
 		return "", err
 	}

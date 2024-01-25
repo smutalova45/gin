@@ -8,6 +8,17 @@ import (
 	"main.go/api/models"
 )
 
+//CreateProduct godoc
+//@Router /product [POST]
+//@Summary Creates a new product 
+//@Description create a new product 
+//@Tags product
+//@Accept json
+//@Produce json
+//@Param product body models.CreateProduct true "product"
+//@Success 201 {object} models.Response
+//@Failure 400 {object} models.Response
+//@Failure 500 {object} models.Response
 func (h Handler) CreateProduct(c *gin.Context) {
 	product := models.CreateProduct{}
 

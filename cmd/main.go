@@ -20,7 +20,7 @@ func main() {
 
 	server := api.New(store)
 
-	if err = server.Run("localhost:8080"); err != nil {
+	if err = server.Run("localhost:8088"); err != nil {
 		panic(err)
 	}
 }

@@ -8,6 +8,18 @@ import (
 	"main.go/api/models"
 )
 
+// CreateCategory godoc
+// @Router /category [POST]
+// @Summary Creates a new category
+// @Description Creates a new category
+// Tags category
+// @Accept json
+// @Produce json
+// @Param category body models.CreateCategory true "category"
+// @Success      201  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) CreateCategory(c *gin.Context) {
 	category := models.CreateCategory{}
 
