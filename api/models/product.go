@@ -26,7 +26,20 @@ type UpdateProduct struct {
 	CategoryID    string `json:"category_id"`
 }
 
+type ProductSell struct {
+	Name string `json:"name"`
+}
+type ProductSellRequest struct {
+	Name     string    `json:"name"`
+	Price    int       `json:"-"`
+	Quantity int       `json:"quantity"`
+	// Product  []Product `json:"product"`
+}
+type SellRequest struct {
+	Products map[string]int `json:"products"`
+	BasketID string         `json:"basket_id"`
+}
 type ProductResponse struct {
-	Product []Product
-	Count   int
+	Product []Product `json:"product"`
+	Count   int       `json:"count"`
 }

@@ -35,3 +35,19 @@ create table basket_products (
     product_id uuid references products(id),
     quantity int
 );
+CREATE OR REPLACE FUNCTION update_product_quantity()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        UPDATE products
+        SET quantity = quantity - NEW.quantity
+        WHERE id = NEW.id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_sale_update_quantity
+AFTER INSERT ON products
+FOR EACH ROW
+EXECUTE FUNCTION update_product_quantity();

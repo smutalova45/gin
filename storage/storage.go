@@ -35,6 +35,8 @@ type IProductStorage interface {
 	GetList(models.GetListRequest) (models.ProductResponse, error)
 	Update(models.UpdateProduct) (string, error)
 	Delete(models.PrimaryKey) error
+	Search(map[string]int) (map[string]int, map[string]int, error)
+	TakeProducts(map[string]int) error
 }
 type IBasketStorage interface {
 	Create(models.CreateBasket) (string, error)

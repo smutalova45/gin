@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -8,20 +9,20 @@ import (
 	"main.go/api/models"
 )
 
-//CreateProduct godoc
-//@Router /product [POST]
-//@Summary Creates a new product 
-//@Description create a new product 
-//@Tags product
-//@Accept json
-//@Produce json
-//@Param product body models.CreateProduct true "product"
-//@Success 201 {object} models.Response
-//@Failure 400 {object} models.Response
-//@Failure 500 {object} models.Response
+// CreateProduct godoc
+// @Router /product [POST]
+// @Summary Creates a new product
+// @Description create a new product
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param product body models.CreateProduct true "product"
+// @Success 201 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 500 {object} models.Response
 func (h Handler) CreateProduct(c *gin.Context) {
 	product := models.CreateProduct{}
-
+	fmt.Println("here1")
 	if err := c.ShouldBindJSON(&product); err != nil {
 		handleResponse(c, "error is while reading body", http.StatusBadRequest, err.Error())
 		return
@@ -29,10 +30,11 @@ func (h Handler) CreateProduct(c *gin.Context) {
 
 	id, err := h.storage.Product().Create(product)
 	if err != nil {
+		fmt.Println("here")
 		handleResponse(c, "error is while creating product", http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	fmt.Println("here3")
 	createdProduct, err := h.storage.Product().GetByID(models.PrimaryKey{ID: id})
 	if err != nil {
 		handleResponse(c, "error is while getting by id product", http.StatusInternalServerError, err.Error())
@@ -42,6 +44,18 @@ func (h Handler) CreateProduct(c *gin.Context) {
 	handleResponse(c, "", http.StatusCreated, createdProduct)
 }
 
+// GetProduct godoc
+// @Router       /product/{id} [GET]
+// @Summary      Gets product
+// @Description  get product by ID
+// @Tags         product
+// @Accept       json
+// @Produce      json
+// @Param        id path string true "product"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) GetProduct(c *gin.Context) {
 	uid := c.Param("id")
 
@@ -54,6 +68,20 @@ func (h Handler) GetProduct(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, product)
 }
 
+// GetProductList godoc
+// @Router       /products [GET]
+// @Summary      Get product list
+// @Description  get product list
+// @Tags         product
+// @Accept       json
+// @Produce      json
+// @Param        page query string false "page"
+// @Param 		 limit query string false "limit"
+// @Param 		 search query string false "search"
+// @Success      200  {object}  models.ProductResponse
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) GetProductList(c *gin.Context) {
 	var (
 		page, limit int
@@ -91,6 +119,19 @@ func (h Handler) GetProductList(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, products)
 }
 
+// UpdateProduct godoc
+// @Router       /product/{id} [PUT]
+// @Summary      Update product
+// @Description  update product
+// @Tags         product
+// @Accept       json
+// @Produce      json
+// @Param 		 id path string true "product_id"
+// @Param        product body models.UpdateProduct true "product"
+// @Success      200  {object}  models.Product
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) UpdateProduct(c *gin.Context) {
 	uid := c.Param("id")
 
@@ -118,6 +159,18 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, updatedProduct)
 }
 
+// DeleteProduct godoc
+// @Router       /product/{id} [DELETE]
+// @Summary      Delete product
+// @Description  delete product
+// @Tags         product
+// @Accept       json
+// @Produce      json
+// @Param 		 id path string true "product_id"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) DeleteProduct(c *gin.Context) {
 	uid := c.Param("id")
 
@@ -127,4 +180,78 @@ func (h Handler) DeleteProduct(c *gin.Context) {
 	}
 
 	handleResponse(c, "", http.StatusOK, "product deleted")
+}
+
+// StartSellNew godoc
+// @Router       /sell-new [POST]
+// @Summary      Selling products
+// @Description  selling products
+// @Tags         product
+// @Accept       json
+// @Produce      json
+// @Param 		 sell_request body models.SellRequest false "sell_request"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h Handler) StartSellNew(c *gin.Context) {
+	request := models.SellRequest{}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	selectedProducts, productPrices, err := h.storage.Product().Search(request.Products)
+	if err != nil {
+		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	basket, err := h.storage.Basket().GetByID(models.PrimaryKey{
+		ID: request.BasketID,
+	})
+	if err != nil {
+		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	customer, err := h.storage.User().GetByID(models.PrimaryKey{
+		ID: basket.CustomerID,
+	})
+	if err != nil {
+		handleResponse(c, "error while getting customer by id", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	totalSum, profit := 0, 0
+	basketProducts := map[string]int{}
+
+	for productID, price := range selectedProducts {
+		customerQuantity := request.Products[productID]
+		totalSum += price * customerQuantity
+
+		// profit logic
+		profit += customerQuantity * (price - productPrices[productID])
+		basketProducts[productID] = customerQuantity
+	}
+
+	if customer.Cash < uint(totalSum) {
+		handleResponse(c, "not enough customer cash", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err = h.storage.Product().TakeProducts(basketProducts); err != nil {
+		handleResponse(c, "error while taking products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err = h.storage.BasketProduct().AddProducts(basket.ID, basketProducts); err != nil {
+		handleResponse(c, "error while adding products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// save profit in db
+
+	handleResponse(c, "successfully finished the purchase", http.StatusOK, profit)
 }

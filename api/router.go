@@ -36,6 +36,8 @@ func New(store storage.IStorage) *gin.Engine {
 	r.GET("/products", h.GetProductList)
 	r.PUT("/product/:id", h.UpdateProduct)
 	r.DELETE("/product/:id", h.DeleteProduct)
+	r.POST("/sell-new", h.StartSellNew)
+
 
 	r.POST("/basket", h.CreateBasket)
 	r.GET("/basket/:id", h.GetBasket)
